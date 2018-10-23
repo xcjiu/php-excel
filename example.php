@@ -6,13 +6,13 @@ $limit = 10000; //一次查询一万条记录
 
 $filename = 'login_log';
 
-$title = ['id'=>'ID','user_id'=>'用户id','main_plat'=>'主渠道','sub_plat'=>'二级渠道','sdk_plat'=>'SDKID','device_code'=>'设备号','ip'=>'用户ip','login_time'=>'登录时间'];
+$title = ['id'=>'ID','user_id'=>'用户id','plat'=>'渠道','username'=>'用户名','sex'=>'性别','ip'=>'用户ip','register_time'=>'注册时间'];
 
-$filter = ['login_time'=>'datetime'];
+$filter = ['sex'=>[1=>'男', 0=>'女'], 'register_time'=>'datetime'];
 
 $con = mysqli_connect('127.0.0.1','root','pass','dbname') or die('数据库连接不上');
 
-$countSql = "select count(*) from user_login_log";
+$countSql = "select count(*) from user";
 
 $count = mysqli_fetch_assoc(mysqli_query($con,$countSql));
 
@@ -22,7 +22,7 @@ $excelObj = (new ExcelExport())->filename($filename)->title($title)->filter($fil
 
 for ($i=0; $i < ceil($total/$limit); $i++) { //分段查询
 	$offset = $i * $limit;
-	$dataSql = "select id,user_id,main_plat,sub_plat,sdk_plat,device_code,ip,login_time from user_login_log limit $limit offset $offset";
+	$dataSql = "select * from user limit $limit offset $offset";
 	$result = mysqli_query($con, $dataSql);
 	$data = [];
 	while ($row = mysqli_fetch_assoc($result)) {
