@@ -5,7 +5,7 @@
 ## 服务器临时生成的文件和目录会在下载后全部清除 
 #### 具体使用说明：把excel文件放入你的项目扩展目录，请确保excel目录有读写权限，并已安装ZipArchive压缩扩展，PHP>= 5.2.0
 ```
-use excel\excelclsss\ExcelExport;
+use excel\excel\excelclass\ExcelExport;
 
 //初始化并配置文件名，标题，字段值过滤器, 这些方法调用顺序随意
 $excelObj = (new ExcelExport())->filename($filename)->title($title)->filter($filter);
