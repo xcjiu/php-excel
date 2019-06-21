@@ -92,7 +92,7 @@ class ExcelExport
     if($zipObj->open($zipname, ZipArchive::CREATE) === true){
       $res = false;
       foreach(glob($this->stodir . "*") as $file){ 
-        $res = $zipObj->addFile($file);
+        $res = $zipObj->addFile($file, substr($file, strrpos($file, '/') + 1));
       }
       $zipObj->close();
       if($res){
