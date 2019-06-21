@@ -65,7 +65,7 @@ $count = mysqli_fetch_assoc(mysqli_query($con,$countSql));
 
 $total = $count['count(*)'];
 
-//这里要注意一点，默认的临时保存文字的目录是 /tmp/ 如果这个目录不存在的话请 ->tmpdir()指定目录，并且保证有读写权限
+//这里要注意一点，默认的临时保存文件的目录是 /tmp/ 如果这个目录不存在的话请 ->tmpdir()指定目录，并且保证有读写权限
 $excelObj = (new ExcelExport())->tmpdir('/tmpdir/')->filename($filename)->title($title)->filter($filter);
 
 for ($i=0; $i < ceil($total/$limit); $i++) { //分段查询, 一次$limit=10000条
