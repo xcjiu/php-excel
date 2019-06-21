@@ -23,12 +23,15 @@ class ExcelExport
    * 指定临时存储路径
    * 请确定这个路径有读写权限
    */
-  public function tmpdir(string $dir)
+  public function tmpdir($dir)
   {
     if(substr($dir, -1) != '/'){
       $dir .= '/';
     }
     $this->stodir = $dir;
+    if(!is_dir($this->stodir)){
+      mkdir($this->stodir);
+    }
     return $this;
   }
 
@@ -162,10 +165,10 @@ class ExcelExport
   public function filename($filename)
   {
     $this->filename = date('Y_m_d') . (string)$filename;
-    if(!is_dir($this->stodir . $this->filename)){
+    /*if(!is_dir($this->stodir . $this->filename)){
       mkdir($this->stodir . $this->filename);
-    }
-    $this->stodir .= $this->filename . '/';
+    }*/
+    //$this->stodir .= $this->filename . '/';
     return $this;
   }
 
