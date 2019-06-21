@@ -1,5 +1,5 @@
 <?php
-namespace app\common\tools;
+namespace app\common\tools; //如果是在框架里面引用最好还是通过命名空间来使用，如果不用请注释或删除这一行
 use \ZipArchive;
 // +-----------------------------------------------------
 // | 数据转换成excel文件导出类，生成多文件打包成zip导出
@@ -134,7 +134,7 @@ class ExcelExport
       if(is_dir($dir)){
           foreach(glob($dir . '*') as $file){ 
               if(is_dir($file)) { 
-                  deldir($file); 
+                  $this->deldir($file); 
                   @rmdir($file);
               } else {
                   @unlink($file);
