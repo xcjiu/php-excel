@@ -19,6 +19,10 @@ $excelObj->excel($data, $i=1);
 //打包zip并下载
 $excelObj->fileload();
 ```
+```
+注意：在服务器运行时可能遇到权限问题，所以请提前给好权限 
+如：默认的读写目录是 ../tmp   则要给tmp目录权限 sudo chown daemon:ubuntu -R tmp , sudo chmod -R 777 tmp
+```
 #### 具体方法参数说明
 filename($filename)
 
