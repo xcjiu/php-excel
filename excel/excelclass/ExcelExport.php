@@ -30,7 +30,10 @@ class ExcelExport
     }
     $this->stodir = $dir;
     if(!is_dir($this->stodir)){
-      mkdir($this->stodir);
+      mkdir($this->stodir, 0777, true);
+    } else {
+      @chown($this->stodir, 'daemon'); //设置用户
+      @chmod($this->stodir, 0777); //设置权限
     }
     return $this;
   }
@@ -106,6 +109,9 @@ class ExcelExport
         @readfile($zipname);//输出文件;
         //清理临时目录和文件
         $this->deldir($this->stodir); 
+
+        @chown($zipname, 'daemon'); //设置用户
+        @chmod($zipname, 0777); //设置权限
         @unlink($zipname);
         ob_flush();
         flush();
@@ -165,10 +171,6 @@ class ExcelExport
   public function filename($filename)
   {
     $this->filename = date('Y_m_d') . (string)$filename;
-    /*if(!is_dir($this->stodir . $this->filename)){
-      mkdir($this->stodir . $this->filename);
-    }*/
-    //$this->stodir .= $this->filename . '/';
     return $this;
   }
 
