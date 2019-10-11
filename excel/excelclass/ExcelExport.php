@@ -1,6 +1,6 @@
 <?php
-namespace app\common\tools; //如果是在框架里面引用最好还是通过命名空间来使用，如果不用请注释或删除这一行
-use \ZipArchive;
+//namespace app\common\tools; //如果是在框架里面引用最好还是通过命名空间来使用，如果不用请注释或删除这一行
+//use \ZipArchive;
 // +-----------------------------------------------------
 // | 数据转换成excel文件导出类，生成多文件打包成zip导出
 // +-----------------------------------------------------
@@ -15,7 +15,7 @@ class ExcelExport
   //文件名
   private $filename = '';
   //字段值过滤器
-  private $filter = []; 
+  private $filter = [];
   //存储文件的临时目录
   private $stodir = '/tmp/';
 
@@ -25,11 +25,11 @@ class ExcelExport
    */
   public function tmpdir($dir)
   {
-    if(substr($dir, -1) != '/'){
+    if (substr($dir, -1) != '/') {
       $dir .= '/';
     }
     $this->stodir = $dir;
-    if(!is_dir($this->stodir)){
+    if (!is_dir($this->stodir)) {
       mkdir($this->stodir, 0777, true);
     } else {
       @chown($this->stodir, 'daemon'); //设置用户
@@ -43,32 +43,34 @@ class ExcelExport
    * @param  array  $data 要导出的数据
    * @return bool
    */
-  public function excel(array $data=[], $i=1) 
-  {  
+  public function excel(array $data = [], $i = 1)
+  {
     set_time_limit(0);
     header("Content-type: text/html; charset=utf-8");
-    if($data && is_array($data)){
+    if ($data && is_array($data)) {
       $filename = $this->filename ? $this->filename : date('Y_m_d');
+      $filename = iconv('UTF-8', 'GB2312', $filename);
       $filter = $this->filter;
-      $current = (array)current($data);
-      if(is_array($current)){
+      $current = (array) current($data);
+      if (is_array($current)) {
         $filePath = $this->stodir . $filename . "($i)" . '.csv';
         $fp = fopen($filePath, 'a');
+        fwrite($fp, chr(0xEF) . chr(0xBB) . chr(0xBF));
         $columns = $this->titleColumn(array_keys($current));
         fputcsv($fp, $columns);
         foreach ($data as &$row) {
           foreach ($row as $k => &$v) {
-            if(!isset($columns[$k])){
+            if (!isset($columns[$k])) {
               unset($row[$k]);
             }
-            if(isset($filter[$k])){
-              if($filter[$k]=='datetime'){
-                $v = date("Y-m-d H:i:s",$v);
+            if (isset($filter[$k])) {
+              if ($filter[$k] == 'datetime') {
+                $v = date("Y-m-d H:i:s", $v);
               }
-              if($filter[$k]=='date'){
-                $v = date("Y-m-d",$v);
+              if ($filter[$k] == 'date') {
+                $v = date("Y-m-d", $v);
               }
-              if(is_array($filter[$k])){
+              if (is_array($filter[$k])) {
                 $v = isset($filter[$k][$v]) ? $filter[$k][$v] : $v;
               }
             }
@@ -90,39 +92,44 @@ class ExcelExport
    */
   public function fileload()
   {
-    $zipname = $this->stodir . '.zip';
+    $zipname = 'data.zip';
     $zipObj = new ZipArchive();
-    if($zipObj->open($zipname, ZipArchive::CREATE) === true){
+    if ($zipObj->open($zipname, ZipArchive::CREATE) === true) {
       $res = false;
-      foreach(glob($this->stodir . "*") as $file){ 
-        $res = $zipObj->addFile($file, substr($file, strrpos($file, '/') + 1));
+      foreach (glob($this->stodir . "*") as $file) {
+        // return $file;
+        $res = $zipObj->addFile($file, basename($file));
       }
       $zipObj->close();
-      if($res){
-        header ("Cache-Control: max-age=0");
+      if ($res) {
+
+        header("Cache-Control: max-age=0");
         header("Content-Description: File Transfer");
         header("Content-Disposition: attachment;filename =" . $zipname);
         header('Content-Type: application/zip');
         header('Content-Transfer-Encoding: binary');
-        header ('Content-Length: ' . filesize($zipname));
+        header('Content-Length: ' . filesize($zipname));
 
-        @readfile($zipname);//输出文件;
-        //清理临时目录和文件
-        $this->deldir($this->stodir); 
-
-        @chown($zipname, 'daemon'); //设置用户
-        @chmod($zipname, 0777); //设置权限
-        @unlink($zipname);
-        ob_flush();
+        ob_clean();
         flush();
-      }else{
-        $this->deldir($this->stodir); 
+
+        @readfile($zipname); //输出文件;
+        //清理临时目录和文件
+        $this->deldir($this->stodir);
+
+        // @chown($zipname, 'daemon'); //设置用户
+        // @chmod($zipname, 0777); //设置权限
+        @unlink($zipname);
+        // ob_flush();
+
+      } else {
+        $this->deldir($this->stodir);
         ob_flush();
         flush();
         die('暂无文件可下载！');
       }
-    }else{
-      $this->deldir($this->stodir); 
+    } else {
+      $this->deldir($this->stodir);
       ob_flush();
       flush();
       die('文件压缩失败！');
@@ -137,17 +144,17 @@ class ExcelExport
    */
   private function deldir($dir)
   {
-      if(is_dir($dir)){
-          foreach(glob($dir . '*') as $file){ 
-              if(is_dir($file)) { 
-                  $this->deldir($file); 
-                  @rmdir($file);
-              } else {
-                  @unlink($file);
-              } 
-          }
-         @rmdir($dir); 
+    if (is_dir($dir)) {
+      foreach (glob($dir . '*') as $file) {
+        if (is_dir($file)) {
+          $this->deldir($file);
+          @rmdir($file);
+        } else {
+          @unlink($file);
+        }
       }
+      @rmdir($dir);
+    }
   }
 
   /**
@@ -157,7 +164,7 @@ class ExcelExport
    */
   public function title($title)
   {
-    if($title && is_array($title)){
+    if ($title && is_array($title)) {
       $this->title = $title;
     }
     return $this;
@@ -170,7 +177,7 @@ class ExcelExport
    */
   public function filename($filename)
   {
-    $this->filename = date('Y_m_d') . (string)$filename;
+    $this->filename = date('Y_m_d') . (string) $filename;
     return $this;
   }
 
@@ -181,7 +188,7 @@ class ExcelExport
    */
   public function filter($filter)
   {
-    $this->filter = (array)$filter;
+    $this->filter = (array) $filter;
     return $this;
   }
 
@@ -193,10 +200,10 @@ class ExcelExport
   protected function titleColumn(array $keys)
   {
     $title = $this->title;
-    if($title && is_array($title)){
+    if ($title && is_array($title)) {
       $titleData = [];
       foreach ($keys as $v) {
-        if(isset($title[$v])){
+        if (isset($title[$v])) {
           $titleData[$v] = $title[$v];
           unset($title[$v]);
         }
